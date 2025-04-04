@@ -1,17 +1,24 @@
 import { Router, Request, Response } from 'express';
 import { Db } from 'mongodb';
+import { Contact, validateContact } from '../models/contact'; // Assurez-vous que le modèle Contact est correctement importé
 
 export default  (db: Db) => {
     const router = Router();
 
     // Route POST pour ajouter un contact
     router.post('/contacts', async (req: Request, res: Response) => {
-        const contact = req.body;
-        if (!contact || !contact.name || !contact.email) {
-            res.status(400).send('Les champs "name" et "email" sont requis.');
+
+        // Récupération et validation des données 
+        const contact: Contact = req.body;
+        contact.createdAt = new Date(); // Ajout de la date de création
+        const validationError = validateContact(contact);
+        
+        if (validationError) {
+            res.status(400).send({ error: validationError });
             return;
         }
-
+        
+        // Insertion en BDD
         try {
             const result = await db.collection('contacts').insertOne(contact);
             res.status(201).send({ message: 'Contact ajouté avec succès!', contactId: result.insertedId });
@@ -19,6 +26,8 @@ export default  (db: Db) => {
             console.error('Erreur lors de l\'insertion dans MongoDB:', error);
             res.status(500).send('Erreur interne du serveur.');
         }
+
+
     });
 
     // Route GET pour récupérer les contacts
