@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { Db, ObjectId } from 'mongodb';
-import { Contact, validateContact } from '../models/contact'; // Assurez-vous que le modèle Contact est correctement importé
+import { Contact, validateContact } from '../models/contact'; 
 
 export default  (db: Db) => {
     const router = Router();

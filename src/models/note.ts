@@ -14,3 +14,5 @@ export function validateNote(note: Partial<Note>): string | null {
     if (!note.content) return 'Le champ "content" est requis.';
     return null; 
 }
+
+
