@@ -1,4 +1,8 @@
+import { ObjectId } from 'mongodb';
+
+
 export interface Contact {
+    userId: ObjectId;
     name: string;
     email: string;
     phone?: string; 

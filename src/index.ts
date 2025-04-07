@@ -2,6 +2,7 @@ import express from 'express';
 import { MongoClient, Db } from 'mongodb';
 import contactsRouter from './routes/contacts'; // Import du routeur
 import notesRouter from './routes/notes'; // Import du routeur
+import authRouter from './routes/auth'; 
 
 const url = 'mongodb://localhost:27017/';
 const dbName = 'soltrim-database';
@@ -20,7 +21,7 @@ async function connectToMongo() {
     // Injecter la base de données dans le routeur
     app.use('/api', contactsRouter(db)); 
     app.use('/api', notesRouter(db));
-    
+    app.use('/api', authRouter(db));    
 
     // Démarrer le serveur après la connexion à MongoDB
     app.listen(3000, () => {

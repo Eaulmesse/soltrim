@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { Db, ObjectId } from 'mongodb';
 import { Note, validateNote } from '../models/note'; 
+import { log } from 'console';
 
 export default (db: Db) => {
     const router = Router();
@@ -8,21 +9,22 @@ export default (db: Db) => {
     // Route POST pour ajouter une note
     router.post('/notes', async (req: Request, res: Response) => {
         const note: Note = req.body;
-        note.createdAt = new Date(); 
-        const validationError = validateNote(note);
-        
-        if (validationError) {
-            res.status(400).send({ error: validationError });
-            return;
-        }
-        
-        // Insertion en BDD
+        note.createdAt = new Date();
+    
         try {
+            
+            const validationError = await validateNote(note, db);
+            if (validationError) {
+                res.status(400).send({ error: validationError }); 
+                return;
+            }
+    
+            
             const result = await db.collection('notes').insertOne(note);
             res.status(201).send({ message: 'Note ajoutée avec succès!', noteId: result.insertedId });
         } catch (error) {
-            console.error('Erreur lors de l\'insertion dans MongoDB:', error);
-            res.status(500).send('Erreur interne du serveur.');
+            console.error('Erreur lors de l\'insertion de la note:', error);
+            res.status(500).send({ error: 'Erreur interne du serveur.' });
         }
     });
 
@@ -76,7 +78,7 @@ export default (db: Db) => {
         const updatedNote: Partial<Note> = req.body;
         updatedNote.updatedAt = new Date(); // Ajout de la date de mise à jour
     
-        const validationError = validateNote(updatedNote);
+        const validationError = validateNote(updatedNote, db);
     
         if (validationError) {
             res.status(400).send({ error: validationError });
