@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { Db, ObjectId } from 'mongodb';
-import { User, validateUser, hashPassword, comparePassword, GenerateJWT } from '../models/user';
+import { User, validateUser, hashPassword, comparePassword } from '../models/user';
 const jwt = require('jsonwebtoken');
 
 export default (db: Db) => {
@@ -30,11 +30,13 @@ export default (db: Db) => {
             }
     
             
-            const token = jwt.sign({ userId: user._id }, 'your-secret-key', {
+            const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
                 expiresIn: '1h',
             });
-            
+
+            res.cookie('token', token, { httpOnly: true, secure: true });
             res.status(200).send({ message: 'Connexion réussie!' , token });
+
             return;
         } catch (error) {
             console.error('Erreur lors de la connexion:', error);
@@ -46,9 +48,6 @@ export default (db: Db) => {
     // route REGISTER
     router.post('/register', async (req: Request, res: Response) => {
         const { email, password } = req.body;
-        
-        
-
         
         try {
             const validationError = validateUser({ email, password });
@@ -72,6 +71,13 @@ export default (db: Db) => {
             console.error('Erreur lors de l\'inscription:', error);
             res.status(500).send('Erreur interne du serveur.');
         }
+    });
+
+
+    // Route Logout
+    router.post('/logout', (req: Request, res: Response) => {
+        res.clearCookie('token', { httpOnly: true, secure: true });
+        res.status(200).send('Déconnexion réussie!');
     });
 
     return router;

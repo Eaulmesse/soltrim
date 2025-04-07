@@ -8,9 +8,9 @@ export default  (db: Db) => {
     // Route POST pour ajouter un contact
     router.post('/contacts', async (req: Request, res: Response) => {
 
-        // Récupération et validation des données 
+        
         const contact: Contact = req.body;
-        contact.createdAt = new Date(); // Ajout de la date de création
+        contact.createdAt = new Date(); 
         const validationError = validateContact(contact);
         
         if (validationError) {
