@@ -3,11 +3,13 @@ import { MongoClient, Db } from 'mongodb';
 import contactsRouter from './routes/contacts'; // Import du routeur
 import notesRouter from './routes/notes'; // Import du routeur
 import authRouter from './routes/auth'; 
+import dotenv from 'dotenv';
 
 const url = 'mongodb://localhost:27017/';
 const dbName = 'soltrim-database';
 
 const app = express();
+dotenv.config();
 app.use(express.json());
 
 let db: Db; // Variable pour stocker la connexion MongoDB

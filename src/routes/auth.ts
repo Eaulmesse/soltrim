@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { Db, ObjectId } from 'mongodb';
-import { User, validateUser, hashPassword, comparePassword } from '../models/user';
+import { User, validateUser, hashPassword, comparePassword, GenerateJWT } from '../models/user';
+const jwt = require('jsonwebtoken');
 
 export default (db: Db) => {
     const router = Router();
@@ -9,7 +10,7 @@ export default (db: Db) => {
     router.post('/login', async (req: Request, res: Response) => {
         const { email, password } = req.body;
     
-        // Validation des données
+        
         if (!email || !password) {
             res.status(400).send('Email et mot de passe requis.');
             return;
@@ -28,8 +29,13 @@ export default (db: Db) => {
                 return;
             }
     
-            // Création d'un token JWT (JSON Web Token) pour l'utilisateur
-            res.status(200).send({ message: 'Connexion réussie!' });
+            
+            const token = jwt.sign({ userId: user._id }, 'your-secret-key', {
+                expiresIn: '1h',
+            });
+            
+            res.status(200).send({ message: 'Connexion réussie!' , token });
+            return;
         } catch (error) {
             console.error('Erreur lors de la connexion:', error);
             res.status(500).send('Erreur interne du serveur.');
@@ -40,10 +46,10 @@ export default (db: Db) => {
     // route REGISTER
     router.post('/register', async (req: Request, res: Response) => {
         const { email, password } = req.body;
-        // Validation des données
+        
         
 
-        // Vérification si l'utilisateur existe déjà
+        
         try {
             const validationError = validateUser({ email, password });
             if (validationError) {
@@ -59,7 +65,7 @@ export default (db: Db) => {
 
 
             const hashedPassword = hashPassword(password); 
-            // Insertion de l'utilisateur dans la base de données
+            
             await db.collection('users').insertOne({ email, hashedPassword });
             res.status(201).send({ message: 'Inscription réussie!' });
         } catch (error) {
