@@ -3,7 +3,10 @@ import { MongoClient, Db } from 'mongodb';
 import contactsRouter from './routes/contacts'; // Import du routeur
 import notesRouter from './routes/notes'; // Import du routeur
 import authRouter from './routes/auth'; 
+import authMiddleware from './middlewares/authMiddleware'; // Import du middleware
 import dotenv from 'dotenv';
+import cookieParser from 'cookie-parser';
+
 
 const url = 'mongodb://localhost:27017/';
 const dbName = 'soltrim-database';
@@ -11,6 +14,7 @@ const dbName = 'soltrim-database';
 const app = express();
 dotenv.config();
 app.use(express.json());
+app.use(cookieParser());
 
 let db: Db; // Variable pour stocker la connexion MongoDB
 
@@ -21,6 +25,8 @@ async function connectToMongo() {
     db = client.db(dbName);
 
     // Injecter la base de données dans le routeur
+    app.use('/api', authMiddleware); // Utiliser le middleware d'authentification
+    
     app.use('/api', contactsRouter(db)); 
     app.use('/api', notesRouter(db));
     app.use('/api', authRouter(db));    
@@ -38,6 +44,3 @@ async function connectToMongo() {
 // Connecter à MongoDB
 connectToMongo();
 
-app.get('/', (req, res) => {
-  res.send('Bienvenue sur le serveur Express!');
-});
