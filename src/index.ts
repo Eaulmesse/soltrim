@@ -16,6 +16,14 @@ dotenv.config();
 app.use(express.json());
 app.use(cookieParser());
 
+declare global {
+  namespace Express {
+    interface Request {
+      user?: Record<string,any>
+    }
+  }
+}
+
 let db: Db; // Variable pour stocker la connexion MongoDB
 
 async function connectToMongo() {
@@ -25,8 +33,7 @@ async function connectToMongo() {
     db = client.db(dbName);
 
     // Injecter la base de données dans le routeur
-    app.use('/api', authMiddleware); // Utiliser le middleware d'authentification
-    
+    app.use('/api', authMiddleware(db)); // Utiliser le middleware d'authentification
     app.use('/api', contactsRouter(db)); 
     app.use('/api', notesRouter(db));
     app.use('/api', authRouter(db));    

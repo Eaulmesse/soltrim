@@ -1,9 +1,11 @@
+import { ObjectId } from "mongodb";
+
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const saltRounds = 12;
 
 export interface User {
-    _id: string;
+    _id: ObjectId;
     email: string;
     password: string;
 }
@@ -21,7 +23,6 @@ export function hashPassword(password: string): string {
     try {
         // Utilisation de la méthode synchrone hashSync
         const hashedPassword = bcrypt.hashSync(password, salt);
-        console.log("mdp haché : " + hashedPassword);
         return hashedPassword;
     } catch (err) {
         console.error('Erreur lors du hachage du mot de passe:', err);
@@ -30,10 +31,6 @@ export function hashPassword(password: string): string {
 }
 
 export function comparePassword(password: string, hashedPassword: string): boolean {
-
-    console.log("password : " + password);
-    console.log("hashedPassword : " + hashedPassword);
-    
     
     try {
         const isMatch = bcrypt.compareSync(password, hashedPassword);
